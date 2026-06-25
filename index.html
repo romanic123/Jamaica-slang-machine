@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX Jamaican Slang Machine</title>
+    <!-- Reflects separation of concerns: Links external style sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="slang-box">
+        <h2>Patois Slang Machine 🇯🇲</h2>
+        <p id="slang-term">Tap the button to learn an expression!</p>
+        <p id="slang-meaning"></p>
+        <button id="getSlangBtn">Fetch Next Slang</button>
+    </div>
+
+    <script>
+        const slangTerm = document.getElementById('slang-term');
+        const slangMeaning = document.getElementById('slang-meaning');
+        const btn = document.getElementById('getSlangBtn');
+        let lastIndex = -1;
+
+        btn.addEventListener('click', function() {
+            btn.disabled = true;
+            slangTerm.textContent = "Connecting to database...";
+            slangMeaning.textContent = "";
+
+            // TRUE AJAX OPERATION: Asynchronously fetching an external local JSON file resource
+            fetch('data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Could not access data.json database resource file.');
+                    }
+                    return response.json(); // Process payload data stream as JSON objects
+                })
+                .then(jamaicanSlangData => {
+                    let randomIndex;
+                    do {
+                        randomIndex = Math.floor(Math.random() * jamaicanSlangData.length);
+                    } while (randomIndex === lastIndex);
+                    
+                    lastIndex = randomIndex;
+                    const selectedData = jamaicanSlangData[randomIndex];
+                    
+                    // Injecting content updates dynamically via modern DOM methods (MDN Web Docs, 2025)
+                    slangTerm.textContent = selectedData.term;
+                    slangMeaning.textContent = `Meaning: ${selectedData.meaning}`;
+                })
+                .catch(error => {
+                    slangTerm.textContent = "AJAX Error: Cannot parse data file.";
+                    slangMeaning.textContent = "Tip: Make sure you are running a local web server (like VS Code Live Server) to allow local AJAX fetches.";
+                    console.error(error);
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                });
+        });
+    </script>
+
+</body>
+</html>
