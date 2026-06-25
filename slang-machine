@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX Jamaican Slang Machine</title>
+    <!-- Reflects separation of concerns: Links external style sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="slang-box">
+        <h2>Patois Slang Machine 🇯🇲</h2>
+        <p id="slang-term">Tap the button to learn an expression!</p>
+        <p id="slang-meaning"></p>
+        <button id="getSlangBtn">Fetch Next Slang</button>
+    </div>
+
+    <script>
+        const slangTerm = document.getElementById('slang-term');
+        const slangMeaning = document.getElementById('slang-meaning');
+        const btn = document.getElementById('getSlangBtn');
+        let lastIndex = -1;
+
+        btn.addEventListener('click', function() {
+            btn.disabled = true;
+            slangTerm.textContent = "Connecting to database...";
+            slangMeaning.textContent = "";
+
+            // TRUE AJAX OPERATION: Asynchronously fetching an external local JSON file resource
+            fetch('data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Could not access data.json database resource file.');
+                    }
+                    return response.json(); // Process payload data stream as JSON objects
+                })
+                .then(jamaicanSlangData => {
+                    let randomIndex;
+                    do {
+                        randomIndex = Math.floor(Math.random() * jamaicanSlangData.length);
+                    } while (randomIndex === lastIndex);
+                    
+                    lastIndex = randomIndex;
+                    const selectedData = jamaicanSlangData[randomIndex];
+                    
+                    // Injecting content updates dynamically via modern DOM methods (MDN Web Docs, 2025)
+                    slangTerm.textContent = selectedData.term;
+                    slangMeaning.textContent = `Meaning: ${selectedData.meaning}`;
+                })
+                .catch(error => {
+                    slangTerm.textContent = "AJAX Error: Cannot parse data file.";
+                    slangMeaning.textContent = "Tip: Make sure you are running a local web server (like VS Code Live Server) to allow local AJAX fetches.";
+                    console.error(error);
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                });
+        });
+    </script>
+
+</body>
+</html>
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e3f2fd;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.slang-box {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    border-top: 8px solid #00771e; /* Jamaican Flag Green */
+}
+
+h2 {
+    margin-top: 0;
+    color: #ffb800; /* Jamaican Flag Gold */
+    text-shadow: 1px 1px 2px #000;
+    font-size: 28px;
+}
+
+#slang-term {
+    font-size: 24px;
+    font-weight: bold;
+    color: #111;
+    margin: 20px 0 10px 0;
+    min-height: 35px;
+}
+
+#slang-meaning {
+    font-size: 16px;
+    font-style: italic;
+    color: #555;
+    margin-bottom: 25px;
+    min-height: 45px;
+}
+
+button {
+    background-color: #000000; /* Jamaican Flag Black */
+    color: #ffb800;
+    border: 2px solid #ffb800;
+    padding: 14px 28px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background-color: #00771e;
+    color: white;
+    border-color: #00771e;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    border-color: #cccccc;
+    cursor: not-allowed;
+}
+
+[
+    { "term": "Wagwan?", "meaning": "What's going on? / How are things?" },
+    { "term": "Irie", "meaning": "Everything is fine, good, or completely okay." },
+    { "term": "Small up yuhself", "meaning": "Make room or squeeze past; to squeeze into a tight space." },
+    { "term": "Mi deh yah", "meaning": "I'm right here; doing alright." },
+    { "term": "Yuh dun know", meaning: "You already know / Absolutely; a phrase expressing agreement." },
+    { "term": "Tun up!", "meaning": "Things are getting wild, excited, or highly energetic." },
+    { "term": "Soon come", "meaning": "I will be there in a little bit (implied relaxed timing)." },
+    { "term": "Big up!", "meaning": "Give respect or congratulations to someone." }
+]
